@@ -6,6 +6,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'signing'
 apply plugin: 'maven'
+apply plugin: "io.codearte.nexus-staging"
 //apply plugin: 'nebula.lint'
 
 sourceCompatibility = 1.8
@@ -17,6 +18,7 @@ ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 buildscript {
    repositories {
     mavenLocal()
+    mavenCentral()
 	maven {
 		url "${artifactory_contextUrl}/${plugin_repo}"
 		url "https://plugins.gradle.org/m2/"
@@ -27,6 +29,7 @@ buildscript {
        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.15"
        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.2.1"
        classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1"
+       classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.9.0"
        //classpath 'com.netflix.nebula:gradle-lint-plugin:latest.release'
   }
 }
@@ -74,17 +77,17 @@ task javadocJar(type: Jar) {
 
 repositories {
 	mavenLocal()
+	mavenCentral()
 	maven { url "${artifactory_contextUrl}/libs-snapshot" }
 	maven { url "${artifactory_contextUrl}/libs-release" }
 	maven { url "https://repo.maven.apache.org/maven2" }
 }
 
 dependencies {
-        //compile project(':smi-lib-wsman-client')
-        compile 'com.dell.isg.smi:wsmanclient:1.0.37'
-        compile 'com.dell.isg.smi:commons-elm:1.0.76'
-        compile 'com.dell.isg.smi:commons-utilities:1.0.32'
-        compile 'com.dell.isg.smi:wiseman:1.0.5'
+    compile 'com.dell.isg.smi:wsmanclient:1.0.37'
+    compile 'com.dell.isg.smi:commons-elm:1.0.76'
+    compile 'com.dell.isg.smi:commons-utilities:1.0.32'
+    compile 'com.dell.isg.smi:wiseman:1.0.5'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
 	compile group: 'io.swagger', name: 'swagger-annotations', version: '1.5.13'
@@ -152,6 +155,13 @@ uploadArchives {
 		}
 	}
 }
+
+nexusStaging {
+    packageGroup = "com.dell.isg.smi"
+    //stagingProfileId = "yourStagingProfileId" //when not defined will be got from server using "packageGroup"
+}
+
+//gradle closeRepository promoteRepository
 
 artifacts {
     archives javadocJar, sourcesJar
